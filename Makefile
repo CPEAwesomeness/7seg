@@ -4,7 +4,7 @@
 #
 # DESCRIPTION:  
 #
-# NOTES:        
+# NOTES:        Using Arduino-Makefile (github.com/sudar/Arduino-Makefile)
 #
 # ------------------------------------------------------------------------------
 
