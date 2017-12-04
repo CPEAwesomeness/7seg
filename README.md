@@ -14,3 +14,7 @@ It counts from 00 to 99 on two seven-segment displays. We integrated an
 Arduino Pro Micro into the project board in order to provide timing functions
 for the project's hardware, as well as a firmware backup to demonstrate
 creating a hardware-equivalent programmed state machine.
+
+## HOW?!:
+This project also uses [Arduino-Makefile](http://github.com/sudar/Arduino-Makefile).
+It's really cool! Develop on Arduino from your favorite Linux text editor.
