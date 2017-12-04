@@ -1,7 +1,6 @@
 # 7seg
 
-7 Segment Display demonstration project for CPE201, Fall 2017
-
+*7 Segment Display demonstration project for CPE201, Fall 2017*
 
 ## Developers:
 * Jessica McCrite ([jessicamccrite](http://github.com/jessicamccrite/))
