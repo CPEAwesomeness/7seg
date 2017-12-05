@@ -92,14 +92,14 @@ RETURNS:           void
 NOTES:             
 ----------------------------------------------------------------------------- */
 void loop() {
-	// Read the button state at the rising edge of the clock (active low)
-	bool button_current = !digitalRead(button);
-
 	// This is the rising edge of the counter clock
 	unsigned long counter_current = millis();
 	if (counter_current >= counter_last + counter_interval) {
 		// This is the rising edge of the counter clock
 		digitalWrite(counter_clock, HIGH);
+
+		// Read the button state at the rising edge of the clock (active low)
+		bool button_current = !digitalRead(button);
 
 		// This conditional section handles carrys and resets
 		if (ones_last == 0) {
