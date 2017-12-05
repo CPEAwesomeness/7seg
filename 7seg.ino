@@ -92,17 +92,14 @@ RETURNS:           void
 NOTES:             
 ----------------------------------------------------------------------------- */
 void loop() {
-	bool button_current = digitalRead(button);
+	// Read the button state at the rising edge of the clock
+	bool button_current = !digitalRead(button);
 
-	// This section is controlled by the counter_interval timing
+	// This is the rising edge of the counter clock
 	unsigned long counter_current = millis();
 	if (counter_current >= counter_last + counter_interval) {
 		// This is the rising edge of the counter clock
 		digitalWrite(counter_clock, HIGH);
-
-		// Update the output pins
-		outputDigit(ones, BCD[ones_last]);
-		outputDigit(tens, BCD[tens_last]);
 
 		// This conditional section handles carrys and resets
 		if (ones_last == 0) {
@@ -111,11 +108,16 @@ void loop() {
 			ones_last = 9;
 		}
 		// Only decrement if the button is not pressed
-		else if (!button_current)
+		else if ((!button_current && tens_last !=9) ||
+				(button_current && tens_last == 9))
 			--ones_last;
 
 		// Reset the counter timer
 		counter_last = counter_current;
+
+		// Update the output pins
+		outputDigit(ones, BCD[ones_last]);
+		outputDigit(tens, BCD[tens_last]);
 	}
 	// This is the falling edge of the counter clock (at half the interval)
 	else if (counter_current >= counter_last + counter_interval / 2) {
