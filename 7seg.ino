@@ -30,22 +30,22 @@ const bool BCD[10][4] = {
 
 // Output ports for ones place
 const char ones[4] = {
-	A0,
-	A1,
-	A2,
-	A3
+	5,
+	4,
+	3,
+	2
 };
 
 // Output ports for tens place
 const char tens[4] = {
-	10,
-	16,
-	14,
-	15
+	9,
+	8,
+	7,
+	16
 };
 
 // Hardware clock pin
-const char counter_clock = 2;
+const char counter_clock = 6;
 
 // Global state variables
 unsigned long counter_last = 0;
@@ -97,12 +97,12 @@ void loop() {
 		outputDigit(tens, BCD[tens_last]);
 
 		// This conditional section handles carrys and resets
-		if (ones_last == 9) {
-			if (tens_last == 9) tens_last = 0;
-			else ++tens_last;
-			ones_last = 0;
+		if (ones_last == 0) {
+			if (tens_last == 0) tens_last = 9;
+			else --tens_last;
+			ones_last = 9;
 		}
-		else ++ones_last;
+		else --ones_last;
 
 		// Reset the counter timer
 		counter_last = counter_current;
