@@ -107,17 +107,19 @@ void loop() {
 			else --tens_last;
 			ones_last = 9;
 		}
-		// Only decrement if the button is not pressed
-		else if ((!button_current && tens_last !=9) ||
-				(button_current && tens_last == 9))
-			--ones_last;
 
-		// Reset the counter timer
-		counter_last = counter_current;
+		// Only decrement if the button is not pressed
+		if ((tens_last == 9 && ones_last == 9 && button_current) || 
+			(!button_current && ones_last != 9 && tens_last != 9)) {
+			--ones_last;
+		};
 
 		// Update the output pins
 		outputDigit(ones, BCD[ones_last]);
 		outputDigit(tens, BCD[tens_last]);
+
+		// Reset the counter timer
+		counter_last = counter_current;
 	}
 	// This is the falling edge of the counter clock (at half the interval)
 	else if (counter_current >= counter_last + counter_interval / 2) {
