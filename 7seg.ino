@@ -92,7 +92,7 @@ RETURNS:           void
 NOTES:             
 ----------------------------------------------------------------------------- */
 void loop() {
-	// Read the button state at the rising edge of the clock
+	// Read the button state at the rising edge of the clock (active low)
 	bool button_current = !digitalRead(button);
 
 	// This is the rising edge of the counter clock
@@ -108,9 +108,10 @@ void loop() {
 			ones_last = 9;
 		}
 
-		// Only decrement if the button is not pressed
-		if ((tens_last == 9 && ones_last == 9 && button_current) || 
-			(!button_current && ones_last != 9 && tens_last != 9)) {
+		// Button initiates sequence and pauses thereafter
+		if ((tens_last != 9 && !button_current) || 
+			(ones_last != 9 && !button_current) ||
+			(tens_last == 9 && ones_last == 9 && button_current)) {
 			--ones_last;
 		};
 
