@@ -47,6 +47,9 @@ const char tens[4] = {
 // Hardware clock pin
 const char counter_clock = 6;
 
+// Button input pin
+const char button = 14;
+
 // Global state variables
 unsigned long counter_last = 0;
 unsigned char ones_last = 0;
@@ -77,6 +80,9 @@ void setup() {
 
 	// Initialize the counter clock pin
 	pinMode(counter_clock, OUTPUT);
+
+	// Initialize the counter clock pin
+	pinMode(button, INPUT_PULLUP);
 }
 
 /* -----------------------------------------------------------------------------
@@ -86,11 +92,13 @@ RETURNS:           void
 NOTES:             
 ----------------------------------------------------------------------------- */
 void loop() {
+	bool button_current = digitalRead(button);
+
 	// This section is controlled by the counter_interval timing
 	unsigned long counter_current = millis();
 	if (counter_current >= counter_last + counter_interval) {
 		// This is the rising edge of the counter clock
-		digitalWrite(counter_clock, 1);
+		digitalWrite(counter_clock, HIGH);
 
 		// Update the output pins
 		outputDigit(ones, BCD[ones_last]);
@@ -102,13 +110,15 @@ void loop() {
 			else --tens_last;
 			ones_last = 9;
 		}
-		else --ones_last;
+		// Only decrement if the button is not pressed
+		else if (!button_current)
+			--ones_last;
 
 		// Reset the counter timer
 		counter_last = counter_current;
 	}
 	// This is the falling edge of the counter clock (at half the interval)
 	else if (counter_current >= counter_last + counter_interval / 2) {
-		digitalWrite(counter_clock, 0);
+		digitalWrite(counter_clock, LOW);
 	}
 }
