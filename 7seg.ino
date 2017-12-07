@@ -50,6 +50,10 @@ const char clkOut = 6;
 // Button input pin
 const char bIn = 14;
 
+// Switch pins
+const char sAct = A1;
+const char sPass = A3;
+
 // Global variables
 unsigned long clkLast = 0;
 unsigned char onesNow = 0;
@@ -72,6 +76,10 @@ RETURNS:           void
 NOTES:             
 ----------------------------------------------------------------------------- */
 void setup() {
+	// Initialize the switch pins;
+	pinMode(sAct, INPUT_PULLUP);
+	pinMode(sPass, INPUT_PULLUP);
+
 	// This loop initializes the port pins we chose as outputs
 //*--- implement conditional here for current switch mode, initialize
 //*--- those pins first
@@ -100,32 +108,32 @@ void loop() {
 	if (clkNow > clkLast + clkSpd) {
 		// This is the rising edge of the counter clock
 		digitalWrite(clkOut, HIGH);
-
-		// Read the bNow state at the rising edge of the clock (active low)
-		bool bNow = !digitalRead(bIn);
-
-		/* This conditional section represents the next, incomming state--------
-		----*/
-		if (onesNow == 0) {
-			if (tensNow == 0) tensNow = 9;
-			else --tensNow;
-			onesNow = 9;
-		}
-		// Button initiates sequence and pauses thereafter
-		if ((tensNow != 9 && !bNow) || 
-			(onesNow != 9 && !bNow) ||
-			(tensNow == 9 && onesNow == 9 && bNow)) {
-			--onesNow;
-		};
-		/*----
-		----------------------------------------------------------------------*/
-
-		// Update the output pins
-		outputDigit(ones, BCD[onesNow]);
-		outputDigit(tens, BCD[tensNow]);
-
-		// Reset the counter timer
+		// Reset the clock timer
 		clkLast = clkNow;
+
+		// Switch disables Arduino output and allows hardware to run on clk
+		if (!digitalRead(sAct) && digitalRead(sPass)) {
+			// Read the button (active low)
+			bool bNow = !digitalRead(bIn);
+
+			// This conditional section represents the next, incomming state----
+			if (onesNow == 0) {
+				if (tensNow == 0) tensNow = 9;
+				else --tensNow;
+				onesNow = 9;
+			}
+			// Button initiates sequence and pauses thereafter
+			if ((tensNow != 9 && !bNow) || 
+				(onesNow != 9 && !bNow) ||
+				(tensNow == 9 && onesNow == 9 && bNow)) {
+				--onesNow;
+			};
+			//------------------------------------------------------------------
+
+			// Update the output pins
+			outputDigit(ones, BCD[onesNow]);
+			outputDigit(tens, BCD[tensNow]);
+		}
 	}
 	// This is the falling edge of the counter clock (at half the interval)
 	else if (clkNow > clkLast + clkSpd / 2) {
