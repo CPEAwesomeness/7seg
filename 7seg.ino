@@ -102,7 +102,7 @@ void loop() {
 		digitalWrite(clkOut, HIGH);
 
 		// Read the bNow state at the rising edge of the clock (active low)
-		bool bNow = !digitalRead(bNow);
+		bool bNow = !digitalRead(bIn);
 
 		/* This conditional section represents the next, incomming state--------
 		----*/
