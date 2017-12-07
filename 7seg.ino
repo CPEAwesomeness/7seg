@@ -60,6 +60,38 @@ unsigned char onesNow = 0;
 unsigned char tensNow = 0;
 
 /* -----------------------------------------------------------------------------
+FUNCTION:          disableOutput()
+DESCRIPTION:       Disables the register output pins
+RETURNS:           void
+NOTES:             
+----------------------------------------------------------------------------- */
+void disableOutput() {
+	// Clear the registers
+	onesNow = 0;
+	tensNow = 0;
+
+	// Disable the register output pins so that the hardware can run
+	for (unsigned char i = 0; i < 4; ++i) {
+		pinMode(tens[i], INPUT);
+		pinMode(ones[i], INPUT);
+	};
+}
+
+/* -----------------------------------------------------------------------------
+FUNCTION:          enableOutput()
+DESCRIPTION:       Enables the register output pins
+RETURNS:           void
+NOTES:             
+----------------------------------------------------------------------------- */
+void enableOutput() {
+	// Enable the register output pins
+	for (unsigned char i = 0; i < 4; ++i) {
+		pinMode(tens[i], OUTPUT);
+		pinMode(ones[i], OUTPUT);
+	};
+}
+
+/* -----------------------------------------------------------------------------
 FUNCTION:          outputDigit()
 DESCRIPTION:       Prints a BCD code to one of the port sequences via loop
 RETURNS:           void
@@ -80,19 +112,13 @@ void setup() {
 	pinMode(sAct, INPUT_PULLUP);
 	pinMode(sPass, INPUT_PULLUP);
 
-	// This loop initializes the port pins we chose as outputs
-//*--- implement conditional here for current switch mode, initialize
-//*--- those pins first
-	for (unsigned char i = 0; i < 4; ++i) {
-		pinMode(ones[i], OUTPUT);
-		pinMode(tens[i], OUTPUT);
-	};
-
 	// Initialize the counter clock pin
 	pinMode(clkOut, OUTPUT);
 
 	// Initialize the button pin
 	pinMode(bIn, INPUT_PULLUP);
+
+	(!sAct && sPass) ? enableOutput() : disableOutput();
 }
 
 /* -----------------------------------------------------------------------------
@@ -113,13 +139,13 @@ void loop() {
 
 		// Switch disables Arduino output and allows hardware to run on clk
 		if (!digitalRead(sAct) && digitalRead(sPass)) {
+			enableOutput();
 			// Read the button (active low)
 			bool bNow = !digitalRead(bIn);
 
 			// This conditional section represents the next, incomming state----
 			if (onesNow == 0) {
-				if (tensNow == 0) tensNow = 9;
-				else --tensNow;
+				tensNow == 0 ? tensNow = 9 : --tensNow;
 				onesNow = 9;
 			}
 			// Button initiates sequence and pauses thereafter
@@ -134,6 +160,7 @@ void loop() {
 			outputDigit(ones, BCD[onesNow]);
 			outputDigit(tens, BCD[tensNow]);
 		}
+		else disableOutput();
 	}
 	// This is the falling edge of the counter clock (at half the interval)
 	else if (clkNow > clkLast + clkSpd / 2) {
