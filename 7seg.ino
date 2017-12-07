@@ -12,7 +12,7 @@ VERSION:           none (yet)
 
 ----------------------------------------------------------------------------- */
 // Counter clock interval (ms)
-const int clkSpd = 167;
+const int clkSpd = 166;
 
 // BCD definition table
 const bool BCD[10][4] = {
@@ -108,14 +108,14 @@ RETURNS:           void
 NOTES:             
 ----------------------------------------------------------------------------- */
 void setup() {
-	// Initialize the switch pins;
+	// Initialize the switch pins (active low) 
 	pinMode(sAct, INPUT_PULLUP);
 	pinMode(sPass, INPUT_PULLUP);
 
 	// Initialize the counter clock pin
 	pinMode(clkOut, OUTPUT);
 
-	// Initialize the button pin
+	// Initialize the button pin (active low)
 	pinMode(bIn, INPUT_PULLUP);
 
 	(!sAct && sPass) ? enableOutput() : disableOutput();
@@ -138,6 +138,7 @@ void loop() {
 		clkLast = clkNow;
 
 		// Switch disables Arduino output and allows hardware to run on clk
+		// (active low)
 		if (!digitalRead(sAct) && digitalRead(sPass)) {
 			enableOutput();
 			// Read the button (active low)
