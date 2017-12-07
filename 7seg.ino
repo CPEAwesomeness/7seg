@@ -11,8 +11,8 @@ NOTES:             Using Arduino-Makefile (github.com/sudar/Arduino-Makefile)
 VERSION:           none (yet)
 
 ----------------------------------------------------------------------------- */
-// Counter interval (ms)
-const int counter_interval = 167;
+// Counter clock interval (ms)
+const int clkSpd = 167;
 
 // BCD definition table
 const bool BCD[10][4] = {
@@ -45,15 +45,15 @@ const char tens[4] = {
 };
 
 // Hardware clock pin
-const char counter_clock = 6;
+const char clkOut = 6;
 
 // Button input pin
-const char button = 14;
+const char bIn = 14;
 
-// Global state variables
-unsigned long counter_last = 0;
-unsigned char ones_last = 0;
-unsigned char tens_last = 0;
+// Global variables
+unsigned long clkLast = 0;
+unsigned char onesNow = 0;
+unsigned char tensNow = 0;
 
 /* -----------------------------------------------------------------------------
 FUNCTION:          outputDigit()
@@ -73,16 +73,18 @@ NOTES:
 ----------------------------------------------------------------------------- */
 void setup() {
 	// This loop initializes the port pins we chose as outputs
+//*--- implement conditional here for current switch mode, initialize
+//*--- those pins first
 	for (unsigned char i = 0; i < 4; ++i) {
 		pinMode(ones[i], OUTPUT);
 		pinMode(tens[i], OUTPUT);
 	};
 
 	// Initialize the counter clock pin
-	pinMode(counter_clock, OUTPUT);
+	pinMode(clkOut, OUTPUT);
 
-	// Initialize the counter clock pin
-	pinMode(button, INPUT_PULLUP);
+	// Initialize the button pin
+	pinMode(bIn, INPUT_PULLUP);
 }
 
 /* -----------------------------------------------------------------------------
@@ -92,38 +94,41 @@ RETURNS:           void
 NOTES:             
 ----------------------------------------------------------------------------- */
 void loop() {
-	// This is the rising edge of the counter clock
-	unsigned long counter_current = millis();
-	if (counter_current >= counter_last + counter_interval) {
+	// Monitor the clock interval
+	unsigned long clkNow = millis();
+
+	if (clkNow > clkLast + clkSpd) {
 		// This is the rising edge of the counter clock
-		digitalWrite(counter_clock, HIGH);
+		digitalWrite(clkOut, HIGH);
 
-		// Read the button state at the rising edge of the clock (active low)
-		bool button_current = !digitalRead(button);
+		// Read the bNow state at the rising edge of the clock (active low)
+		bool bNow = !digitalRead(bNow);
 
-		// This conditional section handles carrys and resets
-		if (ones_last == 0) {
-			if (tens_last == 0) tens_last = 9;
-			else --tens_last;
-			ones_last = 9;
+		/* This conditional section represents the next, incomming state--------
+		----*/
+		if (onesNow == 0) {
+			if (tensNow == 0) tensNow = 9;
+			else --tensNow;
+			onesNow = 9;
 		}
-
 		// Button initiates sequence and pauses thereafter
-		if ((tens_last != 9 && !button_current) || 
-			(ones_last != 9 && !button_current) ||
-			(tens_last == 9 && ones_last == 9 && button_current)) {
-			--ones_last;
+		if ((tensNow != 9 && !bNow) || 
+			(onesNow != 9 && !bNow) ||
+			(tensNow == 9 && onesNow == 9 && bNow)) {
+			--onesNow;
 		};
+		/*----
+		----------------------------------------------------------------------*/
 
 		// Update the output pins
-		outputDigit(ones, BCD[ones_last]);
-		outputDigit(tens, BCD[tens_last]);
+		outputDigit(ones, BCD[onesNow]);
+		outputDigit(tens, BCD[tensNow]);
 
 		// Reset the counter timer
-		counter_last = counter_current;
+		clkLast = clkNow;
 	}
 	// This is the falling edge of the counter clock (at half the interval)
-	else if (counter_current >= counter_last + counter_interval / 2) {
-		digitalWrite(counter_clock, LOW);
+	else if (clkNow > clkLast + clkSpd / 2) {
+		digitalWrite(clkOut, LOW);
 	}
 }
